@@ -21,14 +21,13 @@ def get_help(item='all'):
 			
 class newSocket:
 	def __init__(self, _host, _port, _bufsize, _sock=None):
-		self.sock=_sock
 		self.host = _host
 		self.port = _port
 		self.bufsize = _bufsize
 		if self.sock is None:
 			self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		else:
-			self.sock = sock
+			self.sock = _sock
 	def s_connect(self):
 		try:
 			self.sock.connect((self.host, self.port))
