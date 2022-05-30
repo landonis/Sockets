@@ -1,79 +1,120 @@
-message = 'Can you hear me?'
+MESSAGE = 'Can you hear me?'
 HOST = '127.0.0.1' 
 PORT = 50001
+BUFSIZE=2048
 
-help_text = ['Arguments:', '-s, --send', f'Takes 1 argument for setting message from default message {message}','-o --option', 'Takes no arguments. Shows message connection details.', '-i, --ip', f'Takes 1 argument, set server to connect to. Default set to {HOST}', '-p, --port', f'Takes 1 argument to assign server port to reach. Default set to {PORT}']
+help_text = ['Arguments:',[ 'Message','-s, --send', f'Takes 1 argument for setting message from default message {MESSAGE}'],['Display','-o --option', 'Takes no arguments. Shows message connection details.'],['Address','-i, --ip', f'Takes 1 argument, set server to connect to. Default set to {HOST}'],['Port','-p, --port', f'Takes 1 argument to assign server port to reach. Default set to {PORT}'],['Bufsize','-b, --bufsize', f'Takes 1 argument to assign the maximum amount of data to be recieved at one time. Default is set to {BUFSIZE}.']]
 import socket
 import sys, getopt
 
 
 sock = None
 
-def get_details():
-	return HOST, PORT, message
-
-def getResponse(argv):
+def get_help(item='all'):
+#change item to title inside list item to get specific details only
+#title-command-description
+	for obj in help_text:
+		if isinstance(obj, str) and item=='all': 
+			print(obj) 
+		else: 
+			[print(obj[i]) for i in range(len(obj)) if item=='all'and i!=0 or item==obj[0]]
+			
+class newSocket:
+	def __init__(self, _host, _port, _bufsize, _sock=None):
+		self.sock=_sock
+		self.host = _host
+		self.port = _port
+		self.bufsize = _bufsize
+		if self.sock is None:
+			self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		else:
+			self.sock = sock
+	def s_connect(self):
+		try:
+			self.sock.connect((self.host, self.port))
+			print(f'Message sent')
+			return True
+		except Exception as e:
+			print(e)
+			return False
+		
+	def s_sendall(self, msg, bounce=False):
+		try:
+			self.sock.sendall(msg.encode())
+			return True
+		except Exception as e:
+			print(e)
+			return False
+	def s_recv(self, msg_len):
+		try:
+			chunks = []
+			bytes_recd = 0
+			while bytes_recd < msg_len:
+				chunk = self.sock.recv(min(msg_len-bytes_recd, self.bufsize))
+				if chunk == b'':
+					raise RuntimeError("socket connection broken")
+				chunks.append(chunk)
+				bytes_recd = bytes_recd+len(chunk)
+			return b''.join(chunks)
+		except Exception as e:
+			print(e)
+			self.end_socket()
+			return False
+	def end_socket(self):
+		self.sock.close()
+def main(argv, HOST, PORT, BUFSIZE):
 	try:
-		HOST, PORT, message = get_details()
-	except:
-		print('couldnt load default details')
-		sys.exit()
-	try:
-		opts, args = getopt.getopt(argv,'sip:ho',['send=','ip=','port=', 'help', 'options'])
-		print(opts, args)
+#docs.python.org/3/library/getopt.html
+		opts, args = getopt.getopt(argv,'i:s:p:b:ho',['ip=','send=','port=', 'bufsize=', 'help', 'options'])
+		
 		for opt, arg in opts:
-#			print ('opt:', opt,', arg: ',arg)
 			if opt in ('-h', '--help'):
-				for desc in help_text:
-					print(desc)
+				get_help()
 				sys.exit()
-			if opt in ('-i', '--i'):
-				
+#check for valid ip
+			elif opt in ('-i', '--ip'):
+				print(f'checking for valid ip from input "{arg}"')
 				try:
 					ip_list = arg.split('.')
-					if len(ip_list)==4:
-						vl = [x for item in ip_list if (isinstance(int(item), int) and int(item)>=0 and int(item)<=255)]
-						HOST = vl[0]+'.'+vl[1]+'.'+vl[2]+'.'+vl[3]
-					else:
-						print('invalid length/separator')
-				except:
-					print('could not concate ip')
+					assert(len(ip_list)==4),'invalid length/separator'
+					vl = [item for item in ip_list if (isinstance(int(item), int) and int(item)>=0 and int(item)<=255)]
+					assert(len(vl)==4), "invalid IP"
+					HOST = vl[0]+'.'+vl[1]pyt+'.'+vl[2]+'.'+vl[3]
+							
+				except Exception as e:
+					print(e)
+					print(f'supplied IP "',arg,'" is invalid. Example:\n-i 1.1.1.1')
+					print('Terminating...')
+					sys.exit()
+#Check if port is supplied
 			elif opt in ('--port', '-p'):
 				try: 
-					if isinstance(int(arg), int):
-						PORT=arg 
-				except: print('bad port') 
-			
+					assert(isinstance(int(arg), int)),'Number is not an integer'
+					PORT=int(arg) 
+				except Exception as e: print(e,'bad port "{arg}" supplied') 
+#check if message is supplied			
 			elif opt in ('--send', '-s'):
 				message = arg
-		
+#check for showing information		
 			elif opt in ('-o', '--options'):
 				print(f'Host: {HOST}\nPort: {PORT}\nMessage: {message}')	
-	
+#check to edit bufsize
+			elif opt in('-b, ,--bufsize'):
+				assert(isinstance(int(arg),int)),'Number is not an integer'
+				BUFSIZE=int(arg)
 	except getopt.GetoptError:
 		if len(argv) != 0:
 			print('argument failure')
 			sys.exit(2)
 		else:
-			print('arguments blank, attempting to continue')
-	
-	valid = None
+			print('arguments blank, attempting to continue')			
 	print('Starting connection')
-	try:
-		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-			sock.connect((HOST,PORT))
-			sock.sendall(message.encode())
-			data = sock.recv(1024)
-		try:
-			print(str(data, 'utf-8'))
-			print('response: ', str(data, 'utf-8'))
-			
-		except:
-			print('something went wrong getting the response')
-	except:
-		print('failed to establish connection')
-		return False
+	new_sock = newSocket(HOST, PORT, BUFSIZE)
+	con = new_sock.s_connect()
+	snd = new_sock.s_sendall(MESSAGE)
+	rpl = new_sock.s_recv(16)
+	print(f'connection {con}, send {snd}, reply {rpl}')
 if __name__ == "__main__":
-	getResponse(sys.argv[1:])
+	main(sys.argv[1:], HOST, PORT, BUFSIZE)
 		
 
