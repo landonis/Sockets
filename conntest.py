@@ -21,13 +21,12 @@ def get_help(item='all'):
 			
 class newSocket:
 	def __init__(self, _host, _port, _bufsize, _sock=None):
+		self.sock = _sock
 		self.host = _host
 		self.port = _port
 		self.bufsize = _bufsize
 		if self.sock is None:
 			self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		else:
-			self.sock = _sock
 	def s_connect(self):
 		try:
 			self.sock.connect((self.host, self.port))
@@ -46,15 +45,15 @@ class newSocket:
 			return False
 	def s_recv(self, msg_len):
 		try:
-			chunks = []
+			chunks = []###-------------------------LAST PLACE I WAS
 			bytes_recd = 0
 			while bytes_recd < msg_len:
-				chunk = self.sock.recv(min(msg_len-bytes_recd, self.bufsize))
+				chunk = self.sock.recv(min(msg_len-bytes_recd, msg_len))
 				if chunk == b'':
 					raise RuntimeError("socket connection broken")
 				chunks.append(chunk)
 				bytes_recd = bytes_recd+len(chunk)
-			return b''.join(chunks)
+			return ''.join(chunks)
 		except Exception as e:
 			print(e)
 			self.end_socket()
@@ -78,7 +77,7 @@ def main(argv, HOST, PORT, BUFSIZE):
 					assert(len(ip_list)==4),'invalid length/separator'
 					vl = [item for item in ip_list if (isinstance(int(item), int) and int(item)>=0 and int(item)<=255)]
 					assert(len(vl)==4), "invalid IP"
-					HOST = vl[0]+'.'+vl[1]pyt+'.'+vl[2]+'.'+vl[3]
+					HOST = vl[0]+'.'+vl[1]+'.'+vl[2]+'.'+vl[3]
 							
 				except Exception as e:
 					print(e)
@@ -114,6 +113,6 @@ def main(argv, HOST, PORT, BUFSIZE):
 	rpl = new_sock.s_recv(16)
 	print(f'connection {con}, send {snd}, reply {rpl}')
 if __name__ == "__main__":
-	main(sys.argv[1:], HOST, PORT, BUFSIZE)
+	main(sys.argv[1:], HOST, PORT, 16)
 		
 
