@@ -1,0 +1,26 @@
+{
+	"config": {
+		"host": "127.0.0.1",
+		"port": "50001",
+		"bufsize": "64",
+		"message": "Can you hear me?"
+		},
+	"help": {
+		"Commands": [
+			"Message",
+			"-s, --send", 
+			"Takes 1 argument for setting message from default message {MESSAGE}",
+			"Display",
+			"-o --option",
+			"Takes no arguments. Shows message connection details.",
+			"Address",
+			"-i, --ip",
+			"Takes 1 argument, set server to connect to. Default set to {HOST}",
+			"Port",
+			"-p, --port",
+			"Takes 1 argument to assign server port to reach. Default set to {PORT}",			 
+			"Bufsize",
+			"-b, --bufsize",
+			"Takes 1 argument to assign the maximum amount of data to be recieved at one time."]
+		}
+}

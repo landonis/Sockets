@@ -22,14 +22,14 @@ def main(cd_ip, cd_port, con_num):
 					print('waiting for a message...')
 	#waiting for 16b message Can you hear me?		
 					data = com_sock.s_recv(16)
-					if not data:
+					if not data or data==b'':
 	#send the Okay "A"
 						print('failed to recieve initial message')
 						com_sock.end_socket()
 						break
 						
 					else:
-						rply = "A"
+						rply = "Can you hear me?"
 						com_sock.s_sendall(rply)
 					com_sock.end_socket()		
 			except Exception as e:
@@ -48,7 +48,7 @@ class newSocket:
 		self.host = _host
 		self.port = _port
 		self.bufsize = _bufsize
-
+		print(f'new socket {self.host}:{self.port}')
 	def s_connect(self):
 		try:
 			self.sock.connect((self.host, self.port))
