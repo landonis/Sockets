@@ -2,7 +2,7 @@
 	"config": {
 		"host": "127.0.0.1",
 		"port": "50001",
-		"bufsize": "64",
+		"bufsize": "1028",
 		"message": "Can you hear me?"
 		},
 	"help": {

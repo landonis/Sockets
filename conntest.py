@@ -15,7 +15,7 @@ class newSocket:
 	def s_connect(self):
 		try:
 			self.sock.connect((self.host, self.port))
-			print(f'Message sent')
+			
 			return True
 		except Exception as e:
 			print(f'{e}\n error in s_connect')
@@ -24,13 +24,15 @@ class newSocket:
 	def s_sendall(self, msg, bounce=False):
 		try:
 			self.sock.sendall(msg.encode())
+			print(f'Message sent')
 			return True
 		except Exception as e:
 			print(e)
 			return False
 	def s_recv(self, msg_len):
+		msg_len = int(msg_len)
 		try:
-			chunks = []###-------------------------LAST PLACE I WAS
+			chunks = []
 			bytes_recd = 0
 			while bytes_recd < msg_len:
 				chunk = self.sock.recv(min(msg_len-bytes_recd, msg_len))
@@ -55,7 +57,7 @@ def main(HOST, PORT, MESSAGE, BUFSIZE):
 	new_sock = newSocket(HOST, PORT, BUFSIZE)
 	con = new_sock.s_connect()
 	snd = new_sock.s_sendall(MESSAGE)
-	rpl = new_sock.s_recv(16)
+	rpl = new_sock.s_recv(BUFSIZE)
 	print(f'connection {con}, send {snd}, reply {rpl}')
 if __name__ == "__main__":
 	HOST, PORT, BUFSIZE, MESSAGE, OKAY = read(sys.argv[1:])

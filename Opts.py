@@ -32,6 +32,7 @@ def get_config():
 		 
 def read(argv):
 	HOST, PORT, BUFSIZE, message, OKAY = get_config()
+	display_config = False
 	try:
 #docs.python.org/3/library/getopt.html
 		opts, args = getopt.getopt(argv,'i:s:p:b:ho',['ip=','send=','port=', 'bufsize=', 'help', 'options'])
@@ -64,13 +65,15 @@ def read(argv):
 #check if message is supplied			
 			elif opt in ('--send', '-s'):
 				message = arg
-#check for showing information		
-			elif opt in ('-o', '--options'):
-				print(f'Host: {HOST}\nPort: {PORT}\nMessage: {message}')	
 #check to edit bufsize
 			elif opt in('-b, ,--bufsize'):
 				assert(isinstance(int(arg),int)),'Number is not an integer'
 				BUFSIZE=int(arg)
+#check for showing information		
+			if opt in ('-o', '--options'):
+				display_config = True
+		if display_config:
+			print(f'host:{HOST}:{PORT}\nmessage:{message}\nbufsize:{BUFSIZE}')		
 	except getopt.GetoptError:
 		if len(argv) != 0:
 			print('argument failure')
